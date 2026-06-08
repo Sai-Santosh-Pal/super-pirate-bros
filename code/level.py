@@ -21,5 +21,6 @@ class Level:
                 print(obj.y)
 
     def run(self):
+        self.all_sprites.update()
         self.display_surface.fill('black')
         self.all_sprites.draw(self.display_surface)

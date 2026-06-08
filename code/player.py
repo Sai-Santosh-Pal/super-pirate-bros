@@ -6,3 +6,22 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((48,56))
         self.image.fill('red')
         self.rect = self.image.get_rect(topleft = pos)
+
+        self.direction = vector()
+        self.speed = 2
+
+    def input(self):
+        keys = pygame.key.get_pressed()
+        input_vector = vector(0,0)
+        if keys[pygame.K_RIGHT]:
+            input_vector.x += 1
+        if keys[pygame.K_LEFT]:
+            input_vector.x -= 1
+        self.direction = input_vector
+
+    def move(self):
+        self.rect.topleft += self.direction * self.speed
+
+    def update(self):
+        self.input()
+        self.move()
