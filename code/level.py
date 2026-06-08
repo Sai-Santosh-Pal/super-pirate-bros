@@ -20,7 +20,7 @@ class Level:
                 print(obj.x)
                 print(obj.y)
 
-    def run(self):
-        self.all_sprites.update()
+    def run(self, dt):
+        self.all_sprites.update(dt)
         self.display_surface.fill('black')
         self.all_sprites.draw(self.display_surface)
