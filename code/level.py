@@ -3,6 +3,8 @@ from sprites import Sprite, AnimatedSprite, MovingSprite
 from player import Player
 from groups import AllSprites
 
+from random import uniform
+
 class Level:
     def __init__(self, tmx_map, level_frames):
         self.display_surface = pygame.display.get_surface()
@@ -25,16 +27,37 @@ class Level:
                     case _: z = Z_LAYERS['main']
                 Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, groups, z)
 
+        for obj in tmx_map.get_layer_by_name('BG details'):
+            if obj.name == 'static':
+                Sprite((obj.x, obj.y), obj.image, self.all_sprites, z = Z_LAYERS['bg tiles'])
+            else:
+                AnimatedSprite((obj.x, obj.y), level_frames[obj.name], self.all_sprites, Z_LAYERS['bg tiles'])
+                if obj.name == 'candle':
+                    AnimatedSprite((obj.x, obj.y) + vector(-20,-20), level_frames['candle_light'], self.all_sprites, Z_LAYERS['bg tiles'])
+
         for obj in tmx_map.get_layer_by_name('Objects'):
             if obj.name == 'player':
-                self.player = Player((obj.x, obj.y), self.all_sprites, self.collision_sprites, self.semi_collision_sprites)
+                self.player = Player(
+                    pos = (obj.x, obj.y), 
+                    groups = self.all_sprites, 
+                    collision_sprites  = self.collision_sprites, 
+                    semi_collision_sprites = self.semi_collision_sprites,
+                    frames = level_frames['player'])
             else:
                 if obj.name in ('barrel', 'crate'):
                     Sprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
                 else:
-                    if 'palm' not in obj.name:
-                        frames = level_frames[obj.name]
-                        AnimatedSprite((obj.x, obj.y), frames, self.all_sprites)
+                    frames = level_frames[obj.name] if not 'palm' in obj.name else level_frames['palms'][obj.name]
+                    if obj.name == 'floor_spike' and obj.properties['inverted']:
+                        frames = [pygame.transform.flip(frame, False, True) for frame in frames]
+
+                    groups = [self.all_sprites]
+                    if obj.name in('palm_small', 'palm_large'): groups.append(self.semi_collision_sprites)
+
+                    z = Z_LAYERS['main'] if not 'bg' in obj.name else Z_LAYERS['bg details']
+
+                    animation_speed = ANIMATION_SPEED if not 'palm' in obj.name else ANIMATION_SPEED + uniform(-1,1)
+                    AnimatedSprite((obj.x, obj.y), frames, groups, z, animation_speed)
 
         for obj in tmx_map.get_layer_by_name('Moving Objects'):
             if obj.name == 'helicopter':
