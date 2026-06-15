@@ -1,5 +1,5 @@
 from settings import *
-from sprites import Sprite, AnimatedSprite, MovingSprite, Spike
+from sprites import Sprite, AnimatedSprite, MovingSprite, Spike, Item
 from player import Player
 from groups import AllSprites
 from enemies import Tooth, Shell, Pearl
@@ -124,10 +124,27 @@ class Level:
                     player = self.player, 
                     create_pearl = self.create_pearl)
 
+        for obj in tmx_map.get_layer_by_name('Items'):
+            Item(obj.name, (obj.x, obj.y), level_frames['items'][obj.name], self.all_sprites)
+
     def create_pearl(self, pos, direction):
         Pearl(pos, (self.all_sprites, self.damage_sprites, self.pearl_sprites), self.pearl_surf, direction, 150)
 
+    def pearl_collision(self):
+        for sprite in self.collision_sprites:
+            pygame.sprite.spritecollide(sprite, self.pearl_sprites, True)
+
+    def hit_collision(self):
+        for sprite in self.damage_sprites:
+            if sprite.rect.colliderect(self.player.hitbox_rect):
+                if hasattr(sprite, 'pearl'):
+                    sprite.kill()
+
     def run(self, dt):
         self.display_surface.fill('black')
+        
         self.all_sprites.update(dt)
+        self.pearl_collision()
+        self.hit_collision()
+
         self.all_sprites.draw(self.player.hitbox_rect.center)
