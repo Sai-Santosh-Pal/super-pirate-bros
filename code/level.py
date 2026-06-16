@@ -134,13 +134,17 @@ class Level:
 
     def pearl_collision(self):
         for sprite in self.collision_sprites:
-            pygame.sprite.spritecollide(sprite, self.pearl_sprites, True)
+            sprite = pygame.sprite.spritecollide(sprite, self.pearl_sprites, True)
+            if sprite:
+                ParticleEffectSprite((sprite[0].rect.center), self.particle_frames, self.all_sprites)
 
     def hit_collision(self):
         for sprite in self.damage_sprites:
             if sprite.rect.colliderect(self.player.hitbox_rect):
+                self.player.get_damage()
                 if hasattr(sprite, 'pearl'):
                     sprite.kill()
+                    ParticleEffectSprite((sprite.rect.center), self.particle_frames, self.all_sprites)
 
     def item_collision(self):
         if self.item_sprites:
@@ -148,6 +152,13 @@ class Level:
             if item_sprites:
                 ParticleEffectSprite((item_sprites[0].rect.center), self.particle_frames, self.all_sprites)
         
+    def attack_collision(self):
+        for target in self.pearl_sprites.sprites() + self.tooth_sprites.sprites():
+            facing_target = self.player.rect.centerx < target.rect.centerx and self.player.facing_right or\
+                           self.player.rect.centerx > target.rect.centerx and not self.player.facing_right
+            if target.rect.colliderect(self.player.rect) and self.player.attacking and facing_target:
+                target.reverse()
+
     def run(self, dt):
         self.display_surface.fill('black')
         
@@ -155,5 +166,6 @@ class Level:
         self.pearl_collision()
         self.hit_collision()
         self.item_collision()
+        self.attack_collision()
 
         self.all_sprites.draw(self.player.hitbox_rect.center)
