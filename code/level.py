@@ -61,7 +61,7 @@ class Level:
                     if obj.name == 'floor_spike' and obj.properties['inverted']:
                         frames = [pygame.transform.flip(frame, False, True) for frame in frames]
 
-                    groups = [self.all_sprites]
+                    groups = [self.all_sprites, self.damage_sprites]
                     if obj.name in('palm_small', 'palm_large'): groups.append(self.semi_collision_sprites)
 
                     z = Z_LAYERS['main'] if not 'bg' in obj.name else Z_LAYERS['bg details']
@@ -131,6 +131,18 @@ class Level:
         for obj in tmx_map.get_layer_by_name('Items'):
             Item(obj.name, (obj.x + TILE_SIZE / 2, obj.y + TILE_SIZE / 2), level_frames['items'][obj.name], (self.all_sprites, self.item_sprites), self.data)
 
+        for obj in tmx_map.get_layer_by_name('Water'):
+            rows = int(obj.height / TILE_SIZE)
+            cols = int(obj.width / TILE_SIZE)
+            for row in range(rows):
+                for col in range(cols):
+                    x = obj.x + col * TILE_SIZE
+                    y = obj.y + row * TILE_SIZE
+                    if row == 0:
+                        AnimatedSprite((x,y), level_frames['water_top'], self.all_sprites, Z_LAYERS['water'])
+                    else:
+                        Sprite((x,y), level_frames['water_body'], self.all_sprites, Z_LAYERS['water'])
+
     def create_pearl(self, pos, direction):
         Pearl(pos, (self.all_sprites, self.damage_sprites, self.pearl_sprites), self.pearl_surf, direction, 150)
 
@@ -162,6 +174,10 @@ class Level:
             if target.rect.colliderect(self.player.rect) and self.player.attacking and facing_target:
                 target.reverse()
 
+    def check_constraint(self):
+        if self.player.hitbox_rect.left <= 0:
+            self.player.hitbox_rect.left = 0
+
     def run(self, dt):
         self.display_surface.fill('black')
         
@@ -170,5 +186,6 @@ class Level:
         self.hit_collision()
         self.item_collision()
         self.attack_collision()
+        self.check_constraint()
 
         self.all_sprites.draw(self.player.hitbox_rect.center)
