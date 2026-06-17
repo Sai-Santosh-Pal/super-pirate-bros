@@ -11,7 +11,18 @@ class Level:
         self.display_surface = pygame.display.get_surface()
         self.data = data
 
-        self.all_sprites = AllSprites()
+        self.level_width = tmx_map.width * TILE_SIZE
+        self.level_bottom = tmx_map.height * TILE_SIZE
+        tmx_level_properties = tmx_map.get_layer_by_name('Data')[0].properties
+        if tmx_level_properties['bg']:
+            bg_tile = level_frames['bg_tiles'][tmx_level_properties['bg']]
+        else:
+            bg_tile = None
+
+        self.all_sprites = AllSprites(
+            width = tmx_map.width, 
+            height = tmx_map.height,
+            bg_tile = bg_tile)
         self.collision_sprites = pygame.sprite.Group()
         self.semi_collision_sprites = pygame.sprite.Group()
         self.damage_sprites = pygame.sprite.Group()
@@ -61,13 +72,16 @@ class Level:
                     if obj.name == 'floor_spike' and obj.properties['inverted']:
                         frames = [pygame.transform.flip(frame, False, True) for frame in frames]
 
-                    groups = [self.all_sprites, self.damage_sprites]
+                    groups = [self.all_sprites]
                     if obj.name in('palm_small', 'palm_large'): groups.append(self.semi_collision_sprites)
 
                     z = Z_LAYERS['main'] if not 'bg' in obj.name else Z_LAYERS['bg details']
+                    if obj.name in ('saw', 'floor_spike'): groups.append(self.damage_sprites)
 
                     animation_speed = ANIMATION_SPEED if not 'palm' in obj.name else ANIMATION_SPEED + uniform(-1,1)
                     AnimatedSprite((obj.x, obj.y), frames, groups, z, animation_speed)
+            if obj.name == 'flag':
+                self.level_finish_rect = pygame.Rect((obj.x, obj.y), (obj.width, obj.height))
 
         for obj in tmx_map.get_layer_by_name('Moving Objects'):
             if obj.name == 'spike':
@@ -177,6 +191,14 @@ class Level:
     def check_constraint(self):
         if self.player.hitbox_rect.left <= 0:
             self.player.hitbox_rect.left = 0
+        if self.player.hitbox_rect.right >= self.level_width:
+            self.player.hitbox_rect.right = self.level_width
+        
+        if self.player.hitbox_rect.bottom > self.level_bottom:
+            print('bottom')
+
+        if self.player.hitbox_rect.colliderect(self.level_finish_rect):
+            print('success')
 
     def run(self, dt):
         self.display_surface.fill('black')
