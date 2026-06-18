@@ -6,6 +6,7 @@ from support import *
 from data import Data
 from debug import debug
 from ui import UI
+from overworld import Overworld
 
 class Game:
     def __init__(self):
@@ -18,7 +19,9 @@ class Game:
         self.ui = UI(self.font, self.ui_frames)
         self.data = Data(self.ui)
         self.tmx_maps = {0: load_pygame(join('.', 'data', 'levels', 'omni.tmx'))}
-        self.current_stage = Level(self.tmx_maps[0], self.level_frames, self.data)
+        self.tmx_overworld = load_pygame(join('.', 'data', 'overworld', 'overworld.tmx'))
+        # self.current_stage = Level(self.tmx_maps[0], self.level_frames, self.data)
+        self.current_stage = Overworld(self.tmx_overworld, self.data, self.overworld_frames)
 
     def import_assets(self):
         self.level_frames = {
@@ -49,13 +52,15 @@ class Game:
             'cloud_small': import_folder('.', 'graphics', 'level', 'clouds', 'small'),
             'cloud_large': import_image('.', 'graphics', 'level', 'clouds', 'large_cloud'),
         }
-
         self.font = pygame.font.Font(join('.', 'graphics', 'ui', 'runescape_uf.ttf'), 40)
         self.ui_frames = {
             'heart': import_folder('.', 'graphics', 'ui', 'heart'),
             'coin': import_image('.', 'graphics', 'ui', 'coin')
         }
-
+        self.overworld_frames = {
+            'palms': import_folder('.', 'graphics', 'overworld', 'palm'),
+            'water': import_folder('.', 'graphics', 'overworld', 'water'),
+        }
     def run(self):
         while True:
             dt = self.clock.tick() / 1000
