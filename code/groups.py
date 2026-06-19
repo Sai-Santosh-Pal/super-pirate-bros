@@ -24,7 +24,10 @@ class WorldSprites(pygame.sprite.Group):
 
         for sprite in sorted(self, key = lambda sprite: sprite.rect.centery):
             if sprite.z == Z_LAYERS['main']:
-                self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
+                if hasattr(sprite, 'icon'):
+                    self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset + vector(0,-28))
+                else:
+                    self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
 
 class AllSprites(pygame.sprite.Group):
     def __init__(self, width, height, clouds, horizon_line, bg_tile = None, top_limit = 0):
