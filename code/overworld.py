@@ -87,8 +87,7 @@ class Overworld:
                 if index > 0 and index < len(path) - 1:
                     prev_tile = path[index - 1] - tile
                     next_tile = path[index + 1] - tile
-
-                    surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+                    
                     if prev_tile.x == next_tile.x:
                         surf = self.path_frames['vertical']
                     elif prev_tile.y == next_tile.y:
@@ -96,12 +95,14 @@ class Overworld:
                     else:
                         if prev_tile.x == -1 and next_tile.y == -1 or prev_tile.y == -1 and next_tile.x == -1:
                             surf = self.path_frames['tl']
-                        if prev_tile.x == 1 and next_tile.y == 1 or prev_tile.y == 1 and next_tile.x == 1:
+                        elif prev_tile.x == 1 and next_tile.y == 1 or prev_tile.y == 1 and next_tile.x == 1:
                             surf = self.path_frames['br']
-                        if prev_tile.x == -1 and next_tile.y == 1 or prev_tile.y == 1 and next_tile.x == -1:
+                        elif prev_tile.x == -1 and next_tile.y == 1 or prev_tile.y == 1 and next_tile.x == -1:
                             surf = self.path_frames['bl']
-                        if prev_tile.x == 1 and next_tile.y == -1 or prev_tile.y == -1 and next_tile.x == 1:
+                        elif prev_tile.x == 1 and next_tile.y == -1 or prev_tile.y == -1 and next_tile.x == 1:
                             surf = self.path_frames['tr']
+                        else:
+                            surf = self.path_frames['horizontal']
 
                     PathSprite(
                         pos = (tile.x * TILE_SIZE, tile.y * TILE_SIZE), 
