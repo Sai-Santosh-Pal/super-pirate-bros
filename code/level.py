@@ -15,6 +15,7 @@ class Level:
         self.level_width = tmx_map.width * TILE_SIZE
         self.level_bottom = tmx_map.height * TILE_SIZE
         tmx_level_properties = tmx_map.get_layer_by_name('Data')[0].properties
+        self.level_unlock = tmx_level_properties['level_unlock']
         if tmx_level_properties['bg']:
             bg_tile = level_frames['bg_tiles'][tmx_level_properties['bg']]
         else:
@@ -202,7 +203,7 @@ class Level:
             self.switch_stage('overworld', -1)
 
         if self.player.hitbox_rect.colliderect(self.level_finish_rect):
-            print('success')
+            self.switch_stage('overworld', self.level_unlock)
 
     def run(self, dt):
         self.display_surface.fill('black')

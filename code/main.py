@@ -35,8 +35,12 @@ class Game:
             # self.current_stage = Level()
             pass
         else:
-            self.current_stage = Overworld(self.tmx_overworld, self.data, self.overworld_frames)
-
+            if unlock > 0:
+                self.data.unlocked_level = unlock
+            else:
+                self.data.health -= 1
+            self.current_stage = Overworld(self.tmx_overworld, self.data, self.overworld_frames, switch_stage)
+            
     def import_assets(self):
         self.level_frames = {
             'flag': import_folder('.', 'graphics', 'level', 'flag'),
